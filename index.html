@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tetris</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="loading" class="screen-overlay">
+  <div class="overlay-content">
+    <h2>Loading&hellip;</h2>
+  </div>
+</div>
+
+<div id="main-menu" class="screen-overlay hidden">
+  <div class="menu-content scalable">
+    <h1 class="menu-title">TETRIS</h1>
+    <div class="menu-buttons">
+      <button id="menu-1p-btn" class="menu-btn menu-btn-primary" type="button">1 Player</button>
+      <button id="menu-2p-btn" class="menu-btn" type="button">
+        2 Player <span class="menu-btn-tag">WASD vs Arrows</span>
+      </button>
+    </div>
+    <button id="menu-settings-btn" class="icon-btn open-settings-btn menu-settings-btn" type="button" aria-label="Open settings" title="Settings">&#9881;</button>
+  </div>
+</div>
+
+<div class="game-container scalable hidden">
+  <div class="board-wrap">
+    <canvas id="game-canvas" width="400" height="800"></canvas>
+    <div id="overlay" class="overlay hidden">
+      <div class="overlay-content">
+        <h2 id="overlay-title">Paused</h2>
+        <p id="overlay-message">Press P to resume</p>
+        <button id="restart-btn" class="overlay-btn">Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="side-panel">
+    <div class="side-panel-topbar">
+      <button id="menu-btn" class="icon-btn" type="button" aria-label="Back to main menu" title="Main Menu">&#8962;</button>
+      <button id="settings-btn" class="icon-btn open-settings-btn" type="button" aria-label="Open settings" title="Settings">&#9881;</button>
+    </div>
+
+    <div class="panel-box">
+      <h3>Next</h3>
+      <canvas id="next-canvas" width="128" height="128"></canvas>
+    </div>
+
+    <div class="panel-box stats">
+      <div class="stat-row"><span>Score</span><strong id="score">0</strong></div>
+      <div class="stat-row"><span>Level</span><strong id="level">1</strong></div>
+      <div class="stat-row"><span>Lines</span><strong id="lines">0</strong></div>
+    </div>
+
+    <div class="panel-box controls">
+      <h3>Controls</h3>
+      <ul>
+        <li><span class="keys"><kbd>&larr;</kbd><kbd>&rarr;</kbd></span> Move</li>
+        <li><span class="keys"><kbd>&uarr;</kbd></span> Rotate</li>
+        <li><span class="keys"><kbd>&darr;</kbd></span> Soft Drop</li>
+        <li><span class="keys"><kbd>Space</kbd></span> Hard Drop</li>
+        <li><span class="keys"><kbd>Z</kbd></span> Rotate CCW</li>
+        <li><span class="keys"><kbd>P</kbd></span> Pause</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div id="two-player-screen" class="screen-overlay hidden">
+  <div class="battle-content scalable">
+    <div class="battle-topbar">
+      <button id="battle-menu-btn" class="icon-btn" type="button" aria-label="Back to main menu" title="Main Menu">&#8962;</button>
+    </div>
+
+    <div class="battle-boards">
+      <div class="battle-board">
+        <div class="battle-label">Player 1 <span class="battle-keys">W A S D &middot; Q &middot; Space</span></div>
+        <div class="board-wrap battle-board-wrap">
+          <canvas id="p1-canvas" width="400" height="800"></canvas>
+          <div id="p1-overlay" class="overlay hidden">
+            <div class="overlay-content">
+              <h2 id="p1-overlay-title">Game Over</h2>
+              <p id="p1-overlay-message"></p>
+              <button id="p1-rematch-btn" class="overlay-btn">Rematch</button>
+            </div>
+          </div>
+        </div>
+        <div class="battle-hud">
+          <canvas id="p1-next-canvas" width="72" height="72"></canvas>
+          <div class="battle-hud-stats">
+            <div class="stat-row"><span>Score</span><strong id="p1-score">0</strong></div>
+            <div class="stat-row"><span>Lines</span><strong id="p1-lines">0</strong></div>
+            <div class="stat-row incoming-row"><span>Incoming</span><strong id="p1-incoming">0</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="battle-board">
+        <div class="battle-label">Player 2 <span class="battle-keys">&larr; &uarr; &darr; &rarr; &middot; Shift &middot; Enter</span></div>
+        <div class="board-wrap battle-board-wrap">
+          <canvas id="p2-canvas" width="400" height="800"></canvas>
+          <div id="p2-overlay" class="overlay hidden">
+            <div class="overlay-content">
+              <h2 id="p2-overlay-title">Game Over</h2>
+              <p id="p2-overlay-message"></p>
+              <button id="p2-rematch-btn" class="overlay-btn">Rematch</button>
+            </div>
+          </div>
+        </div>
+        <div class="battle-hud">
+          <canvas id="p2-next-canvas" width="72" height="72"></canvas>
+          <div class="battle-hud-stats">
+            <div class="stat-row"><span>Score</span><strong id="p2-score">0</strong></div>
+            <div class="stat-row"><span>Lines</span><strong id="p2-lines">0</strong></div>
+            <div class="stat-row incoming-row"><span>Incoming</span><strong id="p2-incoming">0</strong></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="settings-modal" class="modal hidden">
+  <div class="modal-backdrop"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Settings</h2>
+      <button id="settings-close-btn" class="modal-close-btn" type="button" aria-label="Close settings">&times;</button>
+    </div>
+
+    <section class="settings-section">
+      <h3>Sound</h3>
+      <label class="settings-row">
+        <span>Mute</span>
+        <input id="setting-mute" type="checkbox">
+      </label>
+      <label class="settings-row">
+        <span>Volume</span>
+        <input id="setting-volume" type="range" min="0" max="100" value="50">
+      </label>
+    </section>
+
+    <section class="settings-section">
+      <h3>Screen Size</h3>
+      <div class="screen-size-options">
+        <button class="screen-size-btn" type="button" data-size="small">Small</button>
+        <button class="screen-size-btn" type="button" data-size="medium">Medium</button>
+        <button class="screen-size-btn" type="button" data-size="large">Large</button>
+      </div>
+    </section>
+
+    <section class="settings-section">
+      <h3>Controls</h3>
+      <div id="keymap-list" class="keymap-list"></div>
+    </section>
+
+    <button id="settings-reset-btn" class="reset-btn" type="button">Reset to Defaults</button>
+  </div>
+</div>
+
+<script src="js/pieces.js"></script>
+<script src="js/board.js"></script>
+<script src="js/renderer.js"></script>
+<script src="js/animator.js"></script>
+<script src="js/input.js"></script>
+<script src="js/sound.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/battle.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
